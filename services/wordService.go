@@ -1,61 +1,56 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"your-words/database"
 	"your-words/models"
-	"your-words/utils"
 )
 
-func AddWord(w http.ResponseWriter, r *http.Request) {
+func AddWord(c *gin.Context) {
 	var word models.Word
-	err := json.NewDecoder(r.Body).Decode(&word)
-
-	if err != nil {
-		utils.WriteJson(w, map[string]string{"status": "error", "message": "Error with decode word"})
+	if err := c.ShouldBindJSON(&word); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Error with decode word"})
 		return
 	}
 
 	if word.Translation == "" || word.Text == "" {
-		utils.WriteJson(w, map[string]string{"status": "error", "message": "Text and translation are required"})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Text and translation are required"})
 		return
 	}
 
 	//Check if word topic exist
 	var topic models.Topic
 	if database.Db.First(&topic, word.TopicID).Error != nil {
-		utils.WriteJson(w, map[string]string{"status": "error", "message": "Topic not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Topic not found"})
 		return
 	}
 
 	//Check if word already exist
 	var wordExist models.Word
 	if database.Db.Where("text = ? AND topic_id = ?", word.Text, word.TopicID).First(&wordExist).Error == nil {
-		utils.WriteJson(w, map[string]string{"status": "error", "message": fmt.Sprintf("Word %s already exist", word.Text)})
+		c.JSON(http.StatusConflict, gin.H{"status": "error", "message": fmt.Sprintf("Word %s already exist", word.Text)})
 		return
 	}
 
-	result := database.Db.Create(&word)
-	if result.Error != nil {
+	if err := database.Db.Create(&word).Error; err != nil {
 		log.Printf("Error with create word %v", word.Text)
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error with create word"})
 		return
 	}
 
-	utils.WriteJson(w, map[string]string{"status": "success", "message": fmt.Sprintf("Word %s created", word.Text)})
-
+	c.JSON(http.StatusCreated, gin.H{"status": "success", "message": fmt.Sprintf("Word %s created", word.Text)})
+	fmt.Printf("Word %s created", word.Text)
 }
 
-func GetAllWords(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GetWords")
+func GetAllWords(c *gin.Context) {
 	var words *[]models.Word
-	result := database.Db.Find(&words)
-	if result.Error != nil {
-	}
-	err := json.NewEncoder(w).Encode(words)
-	if err != nil {
+	if err := database.Db.Find(&words).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error with get words"})
 		return
 	}
+
+	c.JSON(http.StatusOK, words)
 }

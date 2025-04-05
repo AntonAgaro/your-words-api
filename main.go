@@ -1,12 +1,13 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"log"
-	"net/http"
 	"os"
 	"your-words/database"
-	"your-words/handlers"
+	"your-words/services"
 )
 
 func main() {
@@ -14,31 +15,24 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	//handlers.AddWord()
+
 	database.ConnectDb(os.Getenv("DATABASE_URL"))
 
-	http.HandleFunc("/words", handlers.HandleWord)
-	http.HandleFunc("/topics", handlers.HandleTopic)
+	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
-	err = http.ListenAndServe(":8080", enableCORS(http.DefaultServeMux))
-	if err != nil {
+	router.POST("/words", services.AddWord)
+	router.GET("/words", services.GetAllWords)
+	router.GET("/topics", services.GetTopics)
+
+	if err := router.Run(":8080"); err != nil {
 		log.Fatal(err)
 	}
 
-}
-
-func enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		// Handle preflight OPTIONS request
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
 }

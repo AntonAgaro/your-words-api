@@ -1,25 +1,19 @@
 package services
 
 import (
-	"encoding/json"
-	"log"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"your-words/database"
 	"your-words/models"
 )
 
-func GetTopics(w http.ResponseWriter, r *http.Request) {
+func GetTopics(c *gin.Context) {
 	var topics []models.Topic
-	result := database.Db.Find(&topics)
 
-	if result.Error != nil {
-		log.Printf("Error with GetAll: %v", result.Error)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(topics)
-	if err != nil {
-		log.Printf("Error with GetAll topics: %v", err)
+	if err := database.Db.Find(&topics).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error with get topics"})
 		return
 	}
+
+	c.JSON(200, topics)
 }
