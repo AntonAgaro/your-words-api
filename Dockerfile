@@ -1,5 +1,5 @@
 # Use the official Go image as the base image
-FROM golang:1.23 as builder
+FROM golang:1.23-alpine as builder
 
 # Set environment variables for Go build
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
