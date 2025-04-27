@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -22,7 +23,7 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://94.131.107.205:3000"},
+		AllowOrigins:     []string{fmt.Sprintf("%s:%s", os.Getenv("FRONT_HOST"), os.Getenv("FRONT_PORT"))},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
@@ -33,7 +34,7 @@ func main() {
 	router.GET("/words", services.GetAllWords)
 	router.GET("/topics", services.GetTopics)
 
-	if err := router.Run(":8080"); err != nil {
+	if err := router.Run(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))); err != nil {
 		log.Fatal(err)
 	}
 
