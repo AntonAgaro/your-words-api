@@ -11,7 +11,7 @@ func AddBaseTopics() {
 	database.Db.Model(&models.Topic{}).Count(&count)
 
 	if count > 0 {
-		log.Fatal("Base topics were already added!")
+		log.Println("Base topics were already added!")
 		return
 	}
 

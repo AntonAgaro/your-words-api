@@ -15,6 +15,7 @@ func RunMigrations() {
 	//handlers.AddWord()
 	database.ConnectDb(os.Getenv("DATABASE_URL"))
 
+	CreateUsersTable()
 	CreateTopicTable()
 	CreateWordTable()
 	AddBaseTopics()

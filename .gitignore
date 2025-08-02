@@ -3,3 +3,5 @@
 .idea/
  tmp
 pgadmin_data
+
+.DS_Store

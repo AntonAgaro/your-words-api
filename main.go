@@ -34,6 +34,8 @@ func main() {
 	router.GET("/words", services.GetAllWords)
 	router.GET("/topics", services.GetTopics)
 	router.GET("/users", services.GetUsers)
+	router.POST("register", services.Register)
+	router.POST("login", services.Login)
 
 	if err := router.Run(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))); err != nil {
 		log.Fatal(err)
