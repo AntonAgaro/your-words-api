@@ -7,8 +7,8 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"your-words/controllers"
 	"your-words/database"
+	"your-words/routes"
 )
 
 func main() {
@@ -30,12 +30,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	router.POST("/words", controllers.AddWord)
-	router.GET("/words", controllers.GetAllWords)
-	router.GET("/topics", controllers.GetTopics)
-	router.GET("/users", controllers.GetUsers)
-	router.POST("register", controllers.Register)
-	router.POST("login", controllers.Login)
+	routes.RegisterRoutes(router)
 
 	if err := router.Run(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))); err != nil {
 		log.Fatal(err)
