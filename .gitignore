@@ -1,7 +1,8 @@
 .db_data/
 .env
 .idea/
- tmp
+/tmp/
+/*.tmp
 pgadmin_data
 
 .DS_Store
