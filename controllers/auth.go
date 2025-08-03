@@ -53,25 +53,23 @@ func Register(c *gin.Context) {
 }
 
 func Login(c *gin.Context) {
-	var input struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+	username := c.PostForm("username")
+	password := c.PostForm("password")
 
-	if err := c.ShouldBindJSON(&input); err != nil {
+	if username == "" || password == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "invalid input"})
 		return
 	}
 
 	var user models.User
 
-	if err := database.Db.Where("username = ?", input.Username).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "user not found"})
+	if err := database.Db.Where("username = ?", username).First(&user).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "error", "message": "user not found"})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "incorrect username or password"})
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "error", "message": "incorrect username or password"})
 		return
 	}
 
@@ -84,7 +82,7 @@ func Login(c *gin.Context) {
 
 	c.SetCookie("token", token, 86400, "/", "", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Welcome %s!", user.Username)})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Welcome %s!", user.Username), "userId": user.ID})
 }
 
 func getAuthJwt(userId uint) string {
