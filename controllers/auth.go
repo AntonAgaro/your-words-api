@@ -68,6 +68,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(user)
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "error", "message": "incorrect username or password"})
 		return
@@ -82,7 +84,7 @@ func Login(c *gin.Context) {
 
 	c.SetCookie("token", token, 86400, "/", "", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Welcome %s!", user.Username), "userId": user.ID})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Welcome %s!", user.Username), "user": ToUserResponse(user)})
 }
 
 func getAuthJwt(userId uint) string {

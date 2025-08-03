@@ -51,7 +51,9 @@ func AddWord(c *gin.Context) {
 
 func GetAllWords(c *gin.Context) {
 	userId := c.MustGet("userId").(uint)
+	fmt.Println(userId)
 	var words *[]models.Word
+	//TODO достает все слова
 	if err := database.Db.Find(&words).Where("user_id = ?", userId).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error with get words"})
 		return
