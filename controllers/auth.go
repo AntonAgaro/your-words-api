@@ -13,17 +13,16 @@ import (
 )
 
 func Register(c *gin.Context) {
-	var input struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	email := c.PostForm("email")
 
-	if err := c.ShouldBindJSON(&input); err != nil {
+	if username == "" || password == "" || email == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "invalid input"})
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "invalid password"})
@@ -31,8 +30,9 @@ func Register(c *gin.Context) {
 	}
 
 	user := models.User{
-		Username: input.Username,
+		Username: username,
 		Password: string(hashedPassword),
+		Email:    email,
 	}
 
 	if err := database.Db.Create(&user).Error; err != nil {
@@ -49,7 +49,7 @@ func Register(c *gin.Context) {
 
 	c.SetCookie("token", token, 86400, "/", "", false, true)
 
-	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("User %s registered successfully", user.Username)})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("User %s registered successfully", user.Username), "user": ToUserResponse(user)})
 }
 
 func Login(c *gin.Context) {
