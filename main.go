@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"your-words/database"
+	"your-words/migrations"
 	"your-words/routes"
 )
 
@@ -20,6 +21,8 @@ func main() {
 	}
 
 	database.ConnectDb(os.Getenv("DATABASE_URL"))
+
+	migrations.RunMigrations()
 
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
