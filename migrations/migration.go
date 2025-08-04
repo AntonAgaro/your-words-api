@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -19,4 +20,6 @@ func RunMigrations() {
 	CreateTopicTable()
 	CreateWordTable()
 	AddBaseTopics()
+
+	fmt.Println("Migration complete")
 }
