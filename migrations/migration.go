@@ -9,9 +9,11 @@ import (
 )
 
 func RunMigrations() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("APP_ENV") != "prod" {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 	//handlers.AddWord()
 	database.ConnectDb(os.Getenv("DATABASE_URL"))
