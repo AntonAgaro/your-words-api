@@ -1,4 +1,4 @@
-package services
+package controllers
 
 import (
 	"fmt"
@@ -10,6 +10,8 @@ import (
 )
 
 func AddWord(c *gin.Context) {
+	userId := c.MustGet("userId").(uint)
+
 	var word models.Word
 	if err := c.ShouldBindJSON(&word); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Error with decode word"})
@@ -30,10 +32,12 @@ func AddWord(c *gin.Context) {
 
 	//Check if word already exist
 	var wordExist models.Word
-	if database.Db.Where("text = ? AND topic_id = ?", word.Text, word.TopicID).First(&wordExist).Error == nil {
+	if database.Db.Where("user_id = ? AND text = ? AND topic_id = ?", userId, word.Text, word.TopicID).First(&wordExist).Error == nil {
 		c.JSON(http.StatusConflict, gin.H{"status": "error", "message": fmt.Sprintf("Word %s already exist", word.Text)})
 		return
 	}
+
+	word.UserID = userId
 
 	if err := database.Db.Create(&word).Error; err != nil {
 		log.Printf("Error with create word %v", word.Text)
@@ -46,8 +50,10 @@ func AddWord(c *gin.Context) {
 }
 
 func GetAllWords(c *gin.Context) {
+	userId := c.MustGet("userId").(uint)
+	fmt.Println(userId)
 	var words *[]models.Word
-	if err := database.Db.Find(&words).Error; err != nil {
+	if err := database.Db.Where("user_id = ?", userId).Find(&words).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error with get words"})
 		return
 	}

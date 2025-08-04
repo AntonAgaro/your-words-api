@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 	"your-words/database"
-	"your-words/services"
+	"your-words/routes"
 )
 
 func main() {
@@ -30,9 +30,7 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	router.POST("/words", services.AddWord)
-	router.GET("/words", services.GetAllWords)
-	router.GET("/topics", services.GetTopics)
+	routes.RegisterRoutes(router)
 
 	if err := router.Run(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))); err != nil {
 		log.Fatal(err)
