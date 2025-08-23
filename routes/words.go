@@ -11,5 +11,6 @@ func RegisterWordsRoutes(r *gin.Engine) {
 	{
 		words.POST("/", controllers.AddWord)
 		words.GET("/", controllers.GetAllWords)
+		words.GET("/random", controllers.GetRandomWords)
 	}
 }

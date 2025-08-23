@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
 	"your-words/database"
 	"your-words/models"
 )
@@ -51,7 +52,7 @@ func AddWord(c *gin.Context) {
 
 func GetAllWords(c *gin.Context) {
 	userId := c.MustGet("userId").(uint)
-	fmt.Println(userId)
+
 	var words *[]models.Word
 	if err := database.Db.Where("user_id = ?", userId).Find(&words).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Error with get words"})
@@ -59,4 +60,29 @@ func GetAllWords(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, words)
+}
+
+func GetRandomWords(c *gin.Context) {
+	userId := c.MustGet("userId").(uint)
+	limitParam := c.Query("limit")
+	limit := 5
+	if limitParam != "" {
+		if v, err := strconv.Atoi(limitParam); err == nil {
+			if v > 1 && v <= 50 {
+				limit = v
+			} else {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"status":  "error",
+					"message": "limit must be between 1 and 50",
+				})
+				return
+			}
+		}
+	}
+	var words *[]models.Word
+	if err := database.Db.Where("user_id = ?", userId).Order("RANDOM()").Limit(limit).Find(&words).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "error", "message": "Error with finding random words!"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Random words were successfully found!", "words": words})
 }
