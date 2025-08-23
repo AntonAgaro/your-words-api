@@ -87,6 +87,12 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("Welcome %s!", user.Username), "user": ToUserResponse(user)})
 }
 
+func Logout(c *gin.Context) {
+	c.SetCookie("token", "", -1, "/", "", false, true)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "message": fmt.Sprintf("You successfully logout!")})
+
+}
+
 func getAuthJwt(userId uint) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userId": userId,
