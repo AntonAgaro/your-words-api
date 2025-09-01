@@ -9,4 +9,5 @@ func RegisterRoutes(r *gin.Engine) {
 	RegisterTopicsRoutes(r)
 	RegisterAuthRoutes(r)
 	RegisterUsersRoutes(r)
+	RegisterTranslateRoutes(r)
 }
