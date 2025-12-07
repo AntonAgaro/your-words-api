@@ -26,7 +26,7 @@ func main() {
 
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{fmt.Sprintf("%s:%s", os.Getenv("FRONT_HOST"), os.Getenv("FRONT_PORT"))},
+		AllowOrigins:     []string{"https://your-words.peduchat.tech"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
